@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto"
 import { access, readFile } from "node:fs/promises"
 import { dirname, join } from "node:path"
 
@@ -126,6 +127,20 @@ const validateFunctionConfigShape = (value: unknown, configPath: string): Effect
   return Effect.succeed(value as RitFunctionConfig)
 }
 
+const computeImageTag = (
+  functionName: string,
+  handlerModulePath: string,
+  dockerfile: string
+): Effect.Effect<string, string> =>
+  Effect.tryPromise({
+    try: async () => {
+      const handlerSource = await readFile(handlerModulePath, "utf8")
+      const digest = createHash("sha256").update(handlerSource).update("\n---\n").update(dockerfile).digest("hex")
+      return `${functionName.toLowerCase()}:${digest.slice(0, 12)}`
+    },
+    catch: () => `Unable to fingerprint handler source at ${handlerModulePath}`
+  })
+
 const loadFunctionConfig = (handlerModulePath: string): Effect.Effect<RitFunctionConfig | void, string> => {
   const configPath = join(dirname(handlerModulePath), RIT_FUNCTION_CONFIG_FILE)
 
@@ -170,7 +185,6 @@ class ContainerBuilder extends Effect.Service<ContainerBuilder>()("app/Container
           return validateRuntimeConfig(runtime).pipe(
             Effect.flatMap(() => {
               const baseImage = input.baseImage ?? config?.container?.baseImage ?? "oven/bun:1"
-              const imageTag = `${input.functionName.toLowerCase()}:latest`
               const envLines = Object.entries(runtime.environment).map(([key, value]) => `ENV ${key}=${value}`)
               const dockerfile = [
                 `FROM ${baseImage}`,
@@ -182,13 +196,13 @@ class ContainerBuilder extends Effect.Service<ContainerBuilder>()("app/Container
                 "CMD [\"bun\", \"run\", \"src/runtime/invoke.ts\"]"
               ].join("\n")
 
-              return Effect.succeed(
-                {
+              return computeImageTag(input.functionName, input.handlerModulePath, dockerfile).pipe(
+                Effect.map((imageTag) => ({
                   dockerfile,
                   handlerModulePath: input.handlerModulePath,
                   imageTag,
                   runtime
-                } as const
+                } as const))
               )
             })
           )

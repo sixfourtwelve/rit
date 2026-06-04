@@ -14,7 +14,7 @@ const handler: FunctionHandler<RitFunctionEvent, RitFunctionResponse, string> = 
 
     return {
       body: JSON.stringify({
-        message: `Hello ${name}`,
+        message: `Test this ${name}`,
         requestId: context.requestId
       }),
       statusCode: 200
