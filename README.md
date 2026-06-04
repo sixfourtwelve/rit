@@ -58,12 +58,20 @@ Run mode is controlled with `RIT_RUN_MODE`:
 - `simulate` (default): no real docker execution
 - `docker`: builds and runs the container for real
 
+To speed up docker mode, set `RIT_BUILD_POLICY`:
+- `if-not-present` (default): only build if image is missing
+- `always`: always rebuild before run
+- `never`: never build; fail if image is missing
+
 ```bash
 # Simulated
 pnpm start
 
-# Real docker mode
-RIT_RUN_MODE=docker pnpm start
+# Real docker mode (build once, then reuse image)
+RIT_RUN_MODE=docker RIT_BUILD_POLICY=if-not-present pnpm start
+
+# Fastest: never build (requires prebuilt image)
+RIT_RUN_MODE=docker RIT_BUILD_POLICY=never pnpm start
 ```
 
 ## Available Commands

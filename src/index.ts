@@ -9,6 +9,11 @@ import { ContainerBuilder } from "./services/ContainerBuilder"
 import { ContainerRunner } from "./services/ContainerRunner"
 
 const runMode = process.env.RIT_RUN_MODE === "docker" ? "docker" : "simulate"
+const buildPolicy = process.env.RIT_BUILD_POLICY === "always"
+  ? "always"
+  : process.env.RIT_BUILD_POLICY === "never"
+  ? "never"
+  : "if-not-present"
 
 const program = Effect.gen(function*() {
   const analytics = yield* Analytics
@@ -33,6 +38,7 @@ const program = Effect.gen(function*() {
 
   const runResult = yield* containerRunner.run({
     container,
+    buildPolicy,
     mode: runMode,
     payload: event
   })

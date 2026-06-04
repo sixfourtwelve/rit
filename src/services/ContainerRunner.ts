@@ -4,9 +4,11 @@ import { Effect } from "effect"
 
 import type { BuiltContainer } from "./ContainerBuilder"
 
+export type BuildPolicy = "always" | "if-not-present" | "never"
 export type RunMode = "docker" | "simulate"
 
 export interface RunContainerInput {
+  readonly buildPolicy?: BuildPolicy
   readonly container: BuiltContainer
   readonly mode?: RunMode
   readonly payload: unknown
@@ -108,6 +110,7 @@ class ContainerRunner extends Effect.Service<ContainerRunner>()("app/ContainerRu
       }
 
       const mode = input.mode ?? "simulate"
+      const buildPolicy = input.buildPolicy ?? "if-not-present"
       if (mode === "simulate") {
         const durationMs = input.simulatedDurationMs ?? 20
         if (durationMs > input.container.runtime.timeoutMs) {
@@ -142,13 +145,24 @@ class ContainerRunner extends Effect.Service<ContainerRunner>()("app/ContainerRu
         try: async () => {
           const startedAt = Date.now()
 
-          const build = await executeCommand({
-            args: ["docker", "build", "-t", input.container.imageTag, "-f", "-", "."],
-            input: input.container.dockerfile
+          const inspect = await executeCommand({
+            args: ["docker", "image", "inspect", input.container.imageTag]
           })
+          const imageExists = inspect.code === 0
 
-          if (build.code !== 0) {
-            throw new Error(`Docker build failed: ${build.stderr || build.stdout}`)
+          if (buildPolicy === "never" && !imageExists) {
+            throw new Error(`Image ${input.container.imageTag} not found and buildPolicy=never`)
+          }
+
+          if (buildPolicy === "always" || (buildPolicy === "if-not-present" && !imageExists)) {
+            const build = await executeCommand({
+              args: ["docker", "build", "-t", input.container.imageTag, "-f", "-", "."],
+              input: input.container.dockerfile
+            })
+
+            if (build.code !== 0) {
+              throw new Error(`Docker build failed: ${build.stderr || build.stdout}`)
+            }
           }
 
           const envArgs = Object.entries(input.container.runtime.environment).flatMap(([key, value]) => [
