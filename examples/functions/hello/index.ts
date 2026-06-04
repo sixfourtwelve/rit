@@ -4,17 +4,30 @@ import { Effect } from "effect"
 
 import type { FunctionHandler, RitFunctionEvent, RitFunctionResponse } from "@rit/types"
 
-const handler: FunctionHandler<RitFunctionEvent, RitFunctionResponse, string> = (event, context) =>
+type HelloBody = {
+  name: string
+  something: string
+}
+
+type HelloEvent = RitFunctionEvent<HelloBody>
+
+const handler: FunctionHandler<HelloEvent, RitFunctionResponse, string> = (
+  event,
+  context
+) =>
   Effect.gen(function*() {
     if (event.path.trim().length === 0) {
       return yield* Effect.fail("Path is required")
     }
 
-    const name = event.body?.trim().length ? event.body : "world"
+    const {
+      name,
+      something
+    } = event.body ?? { name: "World", something: "nothing" }
 
     return {
       body: JSON.stringify({
-        message: `Test this ${name}`,
+        message: `You gave me name=${name} and something=${something}`,
         requestId: context.requestId
       }),
       statusCode: 200

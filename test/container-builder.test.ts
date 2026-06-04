@@ -14,15 +14,15 @@ describe("ContainerBuilder", () => {
 
       const built = yield* builder.build({
         functionName: "hello-handler",
-        handlerModulePath: resolve("src/functions/hello-handler.ts"),
+        handlerModulePath: resolve("examples/functions/hello/index.ts"),
         runtime: {
           cpu: 0.5,
           timeoutMs: 15_000
         }
       })
 
-      expect(built.runtime.memoryMb).toBe(384)
-      expect(built.runtime.maxPayloadBytes).toBe(262_144)
+      expect(built.runtime.memoryMb).toBe(256)
+      expect(built.runtime.maxPayloadBytes).toBe(1_048_576)
       expect(built.runtime.cpu).toBe(0.5)
       expect(built.runtime.timeoutMs).toBe(15_000)
       expect(built.dockerfile).toContain("CMD [\"bun\", \"run\", \"src/runtime/invoke.ts\"]")

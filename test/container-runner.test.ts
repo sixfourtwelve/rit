@@ -7,7 +7,7 @@ import { DEFAULT_FUNCTION_RUNTIME_CONFIG } from "../src/types/runtime"
 
 const builtContainer: BuiltContainer = {
   dockerfile: "FROM oven/bun:1",
-  handlerModulePath: "src/functions/hello-handler.ts",
+  handlerModulePath: "examples/functions/hello/index.ts",
   imageTag: "test-handler:latest",
   runtime: {
     ...DEFAULT_FUNCTION_RUNTIME_CONFIG,

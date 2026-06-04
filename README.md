@@ -58,6 +58,9 @@ Run mode is controlled with `RIT_RUN_MODE`:
 - `simulate` (default): no real docker execution
 - `docker`: builds and runs the container for real
 
+Handler selection is controlled with `RIT_HANDLER_MODULE` (default: `examples/functions/hello/index.ts`).
+Event payload can be passed via `RIT_EVENT_JSON` (must be valid JSON).
+
 To speed up docker mode, set `RIT_BUILD_POLICY`:
 - `if-not-present` (default): only build if image is missing
 - `always`: always rebuild before run

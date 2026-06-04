@@ -9,8 +9,8 @@ export {
   type NetworkMode
 } from "./runtime"
 
-export interface RitFunctionEvent {
-  readonly body?: string
+export type RitFunctionEvent<Body = unknown> = {
+  readonly body?: Body | undefined
   readonly headers?: Readonly<Record<string, string>>
   readonly path: string
 }
