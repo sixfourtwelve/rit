@@ -1,0 +1,6 @@
+{
+  "runtime": {
+    "memoryMb": 256,
+    "timeoutMs": 5000
+  }
+}

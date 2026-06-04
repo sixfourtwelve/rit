@@ -1,0 +1,15 @@
+{
+  "container": {
+    "baseImage": "oven/bun:1"
+  },
+  "runtime": {
+    "environment": {
+      "RIT_ENV": "development"
+    },
+    "maxPayloadBytes": 262144,
+    "memoryMb": 384,
+    "networkMode": "none",
+    "readOnlyRootFs": true,
+    "timeoutMs": 10000
+  }
+}

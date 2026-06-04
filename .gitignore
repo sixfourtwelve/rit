@@ -1,0 +1,11 @@
+.env
+node_modules/
+dist/
+_old/
+tsconfig.tsbuildinfo
+.DS_Store
+build/
+src/version.ts
+.direnv/
+/tmp/
+.lalph/
