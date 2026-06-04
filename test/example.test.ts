@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Ethan Morgan. All Rights Reserved.
 
+import { describe, it } from "@effect/vitest"
 import { Effect } from "effect"
-import { describe, it } from "vitest"
 
 describe("Example Effect Test", () => {
   it.effect("should run a simple effect", () =>
